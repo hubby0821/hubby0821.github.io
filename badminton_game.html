@@ -78,7 +78,21 @@
       cursor: default;
     }
 
-    /* Toast 提示樣式 */
+    button.wrong {
+      background-color: #f44336 !important;
+      color: white;
+    }
+
+    button.correct {
+      background-color: #4caf50 !important;
+      color: white;
+    }
+
+    button.your-choice {
+      background-color: #ffc107 !important;
+      color: black;
+    }
+
     #toast {
       visibility: hidden;
       min-width: 200px;
@@ -126,7 +140,6 @@
     <div id="quiz-options"></div>
   </div>
 
-  <!-- Toast 訊息容器 -->
   <div id="toast"></div>
 
   <script>
@@ -170,21 +183,37 @@
 
       const optionsDiv = document.getElementById('quiz-options');
       optionsDiv.innerHTML = "";
+
+      const completed = localStorage.getItem('game' + index) === 'true';
+      const yourChoice = parseInt(localStorage.getItem('yourChoice' + index));
+
       q.options.forEach((opt, i) => {
         const btn = document.createElement("button");
         btn.innerText = opt;
+
+        // 顯示已完成狀態（綠色正確 + 黃色你的選擇）
+        if (completed) {
+          if (i === q.answer) btn.classList.add("correct");
+          else if (i === yourChoice) btn.classList.add("your-choice");
+        }
+
         btn.onclick = () => {
-          if (localStorage.getItem('game' + index) === 'true') {
+          if (completed) {
             showToast("你已完成這題，回到主頁！", "success");
             setTimeout(goBackToMain, 1200);
             return;
           }
           if (i === q.answer) {
+            btn.classList.add("correct");
             showToast("答對了！", "success");
             localStorage.setItem('game' + index, 'true');
+            localStorage.setItem('yourChoice' + index, i);
             setTimeout(goBackToMain, 1200);
           } else {
+            btn.classList.add("wrong");
+            localStorage.setItem('yourChoice' + index, i);
             showToast("答錯了，再試一次！", "error");
+            setTimeout(() => btn.classList.remove("wrong"), 1000);
           }
         };
         optionsDiv.appendChild(btn);
@@ -216,11 +245,7 @@
       const percentage = Math.round((completed / questions.length) * 100);
       document.getElementById('progress-bar').style.width = percentage + '%';
       document.getElementById('progress-text').innerText = '完成度：' + percentage + '%';
-      if (completed === questions.length) {
-        document.getElementById('completion-message').classList.remove('hidden');
-      } else {
-        document.getElementById('completion-message').classList.add('hidden');
-      }
+      document.getElementById('completion-message').classList.toggle('hidden', completed !== questions.length);
     }
 
     function resetProgress() {
