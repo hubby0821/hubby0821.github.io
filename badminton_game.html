@@ -7,7 +7,7 @@
     * { box-sizing: border-box; }
     body {
       margin: 0; padding: 0;
-      background: url('https://thumbs.dreamstime.com/b/%E7%BE%BD%E6%AF%9B%E7%90%83%E9%80%8F%E8%A7%86%E5%AE%A4%E5%86%85%E7%AB%9E%E6%8A%80%E5%9C%BA%E5%9B%BE-%E7%A9%BA%E7%BE%BD%E6%AF%9B%E7%90%83%E5%9C%BA%E9%80%8F%E8%A7%86%E7%9A%84%E7%9F%A2%E9%87%8F%E5%9B%BE%E6%8F%92%E5%9B%BE-165552954.jpg') no-repeat center center fixed;
+      background: url('https://thumbs.dreamstime.com/b/%E7%BE%BD%E6%AF%9B%E7%90%83%E9%80%8F%E8%A7%86%E5%AE%A4%E5%86%85%E7%AB%9E%E6%8A%80%E5%9C%BA%E5%9B%BE%E6%8F%92%E5%9B%BE-165552954.jpg') no-repeat center center fixed;
       background-size: cover;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
@@ -67,8 +67,28 @@
       background-color: #2196f3;
       color: white;
       cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s;
     }
-    .hidden { display: none; }
+
+    button:hover {
+      background-color: #1976d2;
+      transform: scale(1.05);
+    }
+
+    button.correct {
+      background-color: #4caf50 !important;
+    }
+
+    button.wrong {
+      background-color: #f44336 !important;
+      color: white;
+    }
+
+    button.your-choice {
+      background-color: #ffc107 !important;
+      color: black;
+    }
+
     #completion-message {
       margin-top: 20px;
       color: #ffeb3b;
@@ -78,20 +98,7 @@
       cursor: default;
     }
 
-    button.wrong {
-      background-color: #f44336 !important;
-      color: white;
-    }
-
-    button.correct {
-      background-color: #4caf50 !important;
-      color: white;
-    }
-
-    button.your-choice {
-      background-color: #ffc107 !important;
-      color: black;
-    }
+    .hidden { display: none; }
 
     #toast {
       visibility: hidden;
@@ -191,10 +198,9 @@
         const btn = document.createElement("button");
         btn.innerText = opt;
 
-        // 顯示已完成狀態（綠色正確 + 黃色你的選擇）
+        // 顯示已完成狀態（綠色正確）
         if (completed) {
           if (i === q.answer) btn.classList.add("correct");
-          else if (i === yourChoice) btn.classList.add("your-choice");
         }
 
         btn.onclick = () => {
