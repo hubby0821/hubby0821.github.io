@@ -2,19 +2,29 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>羽球導覽互動挑戰</title>
+  <title>校友體育館導覽互動挑戰</title>
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0; padding: 0;
-      background: url('background.jpg') no-repeat center center fixed;
+      background: url('https://thumbs.dreamstime.com/b/%E7%BE%BD%E6%AF%9B%E7%90%83%E9%80%8F%E8%A7%86%E5%AE%A4%E5%86%85%E7%AB%9E%E6%8A%80%E5%9C%BA%E5%9B%BE-%E7%A9%BA%E7%BE%BD%E6%AF%9B%E7%90%83%E5%9C%BA%E9%80%8F%E8%A7%86%E7%9A%84%E7%9F%A2%E9%87%8F%E5%9B%BE%E6%8F%92%E5%9B%BE-165552954.jpg') no-repeat center center fixed;
       background-size: cover;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       height: 100vh; text-align: center;
+      position: relative;
     }
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+
     .container {
       background-color: rgba(0, 0, 0, 0.7);
       padding: 30px;
@@ -67,11 +77,38 @@
       background-color: #4caf50;
       cursor: default;
     }
+
+    /* Toast 提示樣式 */
+    #toast {
+      visibility: hidden;
+      min-width: 200px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 12px;
+      position: fixed;
+      z-index: 10;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.5s, visibility 0.5s;
+    }
+
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    #toast.success { background-color: #4caf50; }
+    #toast.error { background-color: #f44336; }
   </style>
 </head>
 <body>
   <div class="container" id="main-screen">
-    <h1>羽球導覽挑戰</h1>
+    <h1>校友體育館導覽挑戰</h1>
     <div class="progress-label" id="progress-text">完成度：0%</div>
     <div class="progress-container">
       <div class="progress-bar" id="progress-bar"></div>
@@ -84,11 +121,13 @@
     </div>
   </div>
 
-  <!-- 題目畫面 -->
   <div class="container hidden" id="quiz-screen">
     <h1 id="quiz-question">題目文字</h1>
     <div id="quiz-options"></div>
   </div>
+
+  <!-- Toast 訊息容器 -->
+  <div id="toast"></div>
 
   <script>
     const questions = [
@@ -114,6 +153,15 @@
       return urlParams.get(name);
     }
 
+    function showToast(message, type) {
+      const toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.className = `show ${type}`;
+      setTimeout(() => {
+        toast.className = toast.className.replace("show", "");
+      }, 2000);
+    }
+
     function showGame(index) {
       const q = questions[index - 1];
       document.getElementById('main-screen').classList.add('hidden');
@@ -127,16 +175,16 @@
         btn.innerText = opt;
         btn.onclick = () => {
           if (localStorage.getItem('game' + index) === 'true') {
-            alert("你已完成這題，回到主頁！");
-            goBackToMain();
+            showToast("你已完成這題，回到主頁！", "success");
+            setTimeout(goBackToMain, 1200);
             return;
           }
           if (i === q.answer) {
-            alert("答對了！");
+            showToast("答對了！", "success");
             localStorage.setItem('game' + index, 'true');
-            goBackToMain();
+            setTimeout(goBackToMain, 1200);
           } else {
-            alert("答錯了，再試一次！");
+            showToast("答錯了，再試一次！", "error");
           }
         };
         optionsDiv.appendChild(btn);
