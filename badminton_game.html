@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>羽球導覽互動挑戰</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100vh; text-align: center;
+    }
+    .container {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 600px;
+      width: 90%;
+    }
+    h1 { font-size: 2em; margin-bottom: 20px; }
+    .progress-label { margin-bottom: 5px; font-weight: bold; }
+    .progress-container {
+      width: 100%;
+      background-color: #444;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      height: 20px;
+      width: 0%;
+      background-color: #4caf50;
+      transition: width 0.3s;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #2196f3;
+      color: white;
+      cursor: pointer;
+    }
+    .hidden { display: none; }
+    #completion-message {
+      margin-top: 20px;
+      color: #ffeb3b;
+    }
+    .completed-task {
+      color: #4caf50;
+      font-weight: bold;
+    }
+    .completed-btn {
+      background-color: #4caf50;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="main-screen">
+    <h1>羽球導覽挑戰</h1>
+    <div class="progress-label" id="progress-text">完成度：0%</div>
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="button-group" id="venue-buttons">
+      <button id="btn1" onclick="showGame(1)">挑戰題目 1</button>
+      <button id="btn2" onclick="showGame(2)">挑戰題目 2</button>
+      <button id="btn3" onclick="showGame(3)">挑戰題目 3</button>
+      <button id="btn4" onclick="showGame(4)">挑戰題目 4</button>
+      <button id="btn5" onclick="showGame(5)">挑戰題目 5</button>
+    </div>
+
+    <div id="completion-message" class="hidden">
+      <h2>恭喜你完成所有挑戰！</h2>
+      <button onclick="resetProgress()">重新開始導覽</button>
+    </div>
+  </div>
+
+  <!-- 題目畫面 -->
+  <div class="container hidden" id="quiz-screen">
+    <h1 id="quiz-question">題目文字</h1>
+    <div class="button-group" id="quiz-options"></div>
+  </div>
+
+  <script>
+    // 解析 URL 參數來決定顯示哪一題
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    // 顯示題目畫面
+    function showGame(index) {
+      const q = questions[index - 1];
+      document.getElementById('main-screen').classList.add('hidden');
+      document.getElementById('quiz-screen').classList.remove('hidden');
+      document.getElementById('quiz-question').innerText = q.question;
+
+      const optionsDiv = document.getElementById('quiz-options');
+      optionsDiv.innerHTML = "";
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+        btn.onclick = () => {
+          if (localStorage.getItem('game' + index) === 'true') {
+            alert("你已完成這題，回到主頁！");
+            goBackToMain();
+            return;
+          }
+
+          if (i === q.answer) {
+            alert("答對了！");
+            localStorage.setItem('game' + index, 'true');
+            goBackToMain();
+          } else {
+            alert("答錯了，再試一次！");
+          }
+        };
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function goBackToMain() {
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('main-screen').classList.remove('hidden');
+      updateProgress();
+    }
+
+    // 更新進度條和題目按鈕
+    function updateProgress() {
+      let completed = 0;
+      for (let i = 1; i <= 5; i++) {
+        if (localStorage.getItem('game' + i) === 'true') {
+          completed++;
+          document.getElementById('btn' + i).innerText = "題目 " + i + " - 已完成";
+          document.getElementById('btn' + i).classList.add('completed-btn');
+        } else {
+          document.getElementById('btn' + i).innerText = "挑戰題目 " + i;
+          document.getElementById('btn' + i).classList.remove('completed-btn');
+        }
+      }
+      const percentage = Math.round((completed / 5) * 100);
+      document.getElementById('progress-bar').style.width = percentage + '%';
+      document.getElementById('progress-text').innerText = '完成度：' + percentage + '%';
+      if (completed === 5) {
+        document.getElementById('completion-message').classList.remove('hidden');
+      } else {
+        document.getElementById('completion-message').classList.add('hidden');
+      }
+    }
+
+    // 重新開始導覽
+    function resetProgress() {
+      localStorage.clear();  // 清除所有儲存的進度
+      updateProgress();      // 更新進度條
+      document.getElementById('completion-message').classList.add('hidden');
+      document.getElementById('main-screen').classList.remove('hidden');
+      document.getElementById('quiz-screen').classList.add('hidden');
+    }
+
+    // 題目資料
+    const questions = [
+      {
+        question: "羽球正式比賽採用幾分制？",
+        options: ["21分制", "15分制", "11分制", "30分制"],
+        answer: 0
+      },
+      {
+        question: "發球時，發球員應站在哪一側？",
+        options: ["左邊", "右邊", "中間", "後場"],
+        answer: 1
+      },
+      {
+        question: "國際羽聯的英文縮寫是？",
+        options: ["BWF", "FWB", "WFB", "IBF"],
+        answer: 0
+      },
+      {
+        question: "羽球拍的拍面通常使用什麼材質？",
+        options: ["金屬線", "尼龍線", "棉線", "碳纖線"],
+        answer: 1
+      },
+      {
+        question: "羽球最高速度紀錄大約是多少？",
+        options: ["超過200公里/小時", "超過300公里/小時", "超過400公里/小時", "超過500公里/小時"],
+        answer: 2
+      }
+    ];
+
+    window.onload = function() {
+      const questionIndex = getQueryParam('question');
+      if (questionIndex) {
+        showGame(parseInt(questionIndex)); // 顯示指定的題目
+      } else {
+        updateProgress(); // 顯示主頁
+      }
+    };
+  </script>
+</body>
+</html>
