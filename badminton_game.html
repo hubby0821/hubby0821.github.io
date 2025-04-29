@@ -125,6 +125,26 @@
 
     #toast.success { background-color: #4caf50; }
     #toast.error { background-color: #f44336; }
+
+    /* 新增煙火樣式 */
+    .firework {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      animation: firework 1.5s forwards;
+    }
+
+    @keyframes firework {
+      0% {
+        transform: scale(0);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(10);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -198,7 +218,6 @@
         const btn = document.createElement("button");
         btn.innerText = opt;
 
-        // 顯示已完成狀態（綠色正確）
         if (completed) {
           if (i === q.answer) btn.classList.add("correct");
         }
@@ -215,6 +234,7 @@
             localStorage.setItem('game' + index, 'true');
             localStorage.setItem('yourChoice' + index, i);
             setTimeout(goBackToMain, 1200);
+            createFirework(event.clientX, event.clientY);  // 呼叫煙火效果
           } else {
             btn.classList.add("wrong");
             localStorage.setItem('yourChoice' + index, i);
@@ -252,6 +272,33 @@
       document.getElementById('progress-bar').style.width = percentage + '%';
       document.getElementById('progress-text').innerText = '完成度：' + percentage + '%';
       document.getElementById('completion-message').classList.toggle('hidden', completed !== questions.length);
+
+      // 如果所有問題完成，顯示大煙火
+      if (completed === questions.length) {
+        showBigFirework();
+      }
+    }
+
+    function showBigFirework() {
+      for (let i = 0; i < 10; i++) { // 控制大煙火的數量
+        createFirework(Math.random() * window.innerWidth, Math.random() * window.innerHeight);
+      }
+    }
+
+    function createFirework(x, y) {
+      const firework = document.createElement("div");
+      firework.classList.add("firework");
+      firework.style.width = "10px";
+      firework.style.height = "10px";
+      firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      firework.style.left = `${x - 5}px`;
+      firework.style.top = `${y - 5}px`;
+
+      document.body.appendChild(firework);
+
+      setTimeout(() => {
+        firework.remove();
+      }, 1500);
     }
 
     function resetProgress() {
